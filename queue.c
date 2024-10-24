@@ -1,45 +1,70 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX 100
+#define MAX_SIZE 100
 
-int queue[MAX], front = -1, rear = -1;
+struct Queue {
+    int items[MAX_SIZE];
+    int front, rear;
+};
 
-void enqueue(int item) {
-    if (rear < MAX - 1) {
-        if (front == -1) front = 0;
-        queue[++rear] = item;
-        printf("%d enqueued\n", item);
+void initialize(struct Queue *q) {
+    q->front = -1;
+    q->rear = -1;
+}
+
+int isEmpty(struct Queue *q) {
+    return q->front == -1;
+}
+
+int isFull(struct Queue *q) {
+    return q->rear == MAX_SIZE - 1;
+}
+
+void enqueue(struct Queue *q, int item) {
+    if (!isFull(q)) {
+        if (isEmpty(q)) q->front = 0; // First element
+        q->items[++q->rear] = item;
+        printf("Enqueued: %d\n", item);
     } else {
-        printf("Queue Overflow!\n");
+        printf("Queue is full!\n");
     }
 }
 
-int dequeue() {
-    if (front != -1 && front <= rear) {
-        return queue[front++];
-    } else {
-        printf("Queue Underflow!\n");
-        return -1; // Indicate error
+int dequeue(struct Queue *q) {
+    if (!isEmpty(q)) {
+        int item = q->items[q->front];
+        if (q->front >= q->rear) // Last element removed
+            q->front = q->rear = -1;
+        else
+            q->front++;
+        return item;
     }
+    printf("Queue is empty!\n");
+    return -1; // Error
 }
 
-void display() {
-    if (front == -1 || front > rear) {
-        printf("Queue is empty\n");
-    } else {
+void display(struct Queue *q) {
+    if (!isEmpty(q)) {
         printf("Queue: ");
-        for (int i = front; i <= rear; i++) printf("%d ", queue[i]);
+        for (int i = q->front; i <= q->rear; i++)
+            printf("%d ", q->items[i]);
         printf("\n");
+    } else {
+        printf("Queue is empty!\n");
     }
 }
 
 int main() {
-    enqueue(10); enqueue(20); enqueue(30);
-    display();
+    struct Queue q;
+    initialize(&q);
+
+    enqueue(&q, 10);
+    enqueue(&q, 20);
+    display(&q);
     
-    printf("%d dequeued\n", dequeue());
-    display();
+    printf("Dequeued: %d\n", dequeue(&q));
+    display(&q);
 
     return 0;
 }
